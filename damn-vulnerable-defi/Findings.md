@@ -26,6 +26,17 @@
     }
 
 ```
+``` diff
+    function setUp() public {
+        startHoax(deployer);
+        // Deploy token and vault
++      recipient = new FlashLoanRecipient(token,vault);
+        token = new DamnValuableToken();
+```
+
+
+
+
 ``` solidity 
 contract FlashLoanRecipient is IERC3156FlashBorrower {
     DamnValuableToken public token;
