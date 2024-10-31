@@ -28,6 +28,12 @@
 ```
 
 ``` diff
+
+    DamnValuableToken public token;
+    UnstoppableVault public vault;
+    UnstoppableMonitor public monitorContract;
++    FlashLoanRecipient public recipient;
+
     function setUp() public {
         startHoax(deployer);
         // Deploy token and vault
