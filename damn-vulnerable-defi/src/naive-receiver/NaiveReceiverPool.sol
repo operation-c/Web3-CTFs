@@ -35,6 +35,7 @@ contract NaiveReceiverPool is Multicall, IERC3156FlashLender {
         return 0;
     }
 
+    // fee will cost 1e18
     function flashFee(address token, uint256) external view returns (uint256) {
         if (token != address(weth)) revert UnsupportedCurrency();
         return FIXED_FEE;
